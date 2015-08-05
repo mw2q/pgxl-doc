@@ -1,0 +1,476 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>Row Security Policies</TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REV="MADE"
+HREF="mailto:pgsql-docs@postgresql.org"><LINK
+REL="HOME"
+TITLE="Postgres-XL 9.5alpha1 (Postgres-XL 9.5alpha1) Documentation"
+HREF="index.html"><LINK
+REL="UP"
+TITLE="Data Definition"
+HREF="ddl.html"><LINK
+REL="PREVIOUS"
+TITLE="Privileges"
+HREF="ddl-priv.html"><LINK
+REL="NEXT"
+TITLE="Schemas"
+HREF="ddl-schemas.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"><META
+HTTP-EQUIV="Content-Type"
+CONTENT="text/html; charset=ISO-8859-1"><META
+NAME="creation"
+CONTENT="2015-07-31T21:28:58"></HEAD
+><BODY
+CLASS="SECT1"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="4"
+ALIGN="center"
+VALIGN="bottom"
+><A
+HREF="index.html"
+>Postgres-XL 9.5alpha1 (Postgres-XL 9.5alpha1) Documentation</A
+></TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="top"
+><A
+TITLE="Privileges"
+HREF="ddl-priv.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="ddl.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="60%"
+ALIGN="center"
+VALIGN="bottom"
+>Chapter 5. Data Definition</TD
+><TD
+WIDTH="20%"
+ALIGN="right"
+VALIGN="top"
+><A
+TITLE="Schemas"
+HREF="ddl-schemas.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="SECT1"
+><H1
+CLASS="SECT1"
+><A
+NAME="DDL-ROWSECURITY"
+>5.7. Row Security Policies</A
+></H1
+><P
+>   In addition to the <A
+HREF="ddl-priv.html"
+>Section 5.6</A
+> system available through
+   <A
+HREF="sql-grant.html"
+>GRANT</A
+>, tables can have row security policies
+   which limit the rows returned for normal queries and rows which can
+   be added through data modification commands.  By default, tables do
+   not have any policies and all rows are visible and able to be added,
+   subject to the regular <A
+HREF="ddl-priv.html"
+>Section 5.6</A
+> system.  This is
+   also known as Row Level Security.
+  </P
+><P
+>   When row security is enabled on a table with
+   <A
+HREF="sql-altertable.html"
+>ALTER TABLE</A
+>, all normal access to the table
+   (excluding the owner) for selecting rows or adding rows must be through
+   a policy.  If no policy exists for the table, a default-deny policy is
+   used and no rows are visible or can be added.  Privileges which operate
+   at the whole table level such as <TT
+CLASS="LITERAL"
+>TRUNCATE</TT
+>, and
+   <TT
+CLASS="LITERAL"
+>REFERENCES</TT
+> are not subject to row security.
+  </P
+><P
+>   Row security policies can be specific to commands, or to roles, or to
+   both.  The commands available are <TT
+CLASS="LITERAL"
+>ALL</TT
+>,
+   <TT
+CLASS="LITERAL"
+>SELECT</TT
+>, <TT
+CLASS="LITERAL"
+>INSERT</TT
+>, <TT
+CLASS="LITERAL"
+>UPDATE</TT
+>, and
+   <TT
+CLASS="LITERAL"
+>DELETE</TT
+>.  Multiple roles can be assigned to a given policy
+   and normal role membership and inheritance rules apply.
+  </P
+><P
+>   To specify which rows are visible and what rows can be added to the
+   table with row level security, an expression is required which returns
+   a boolean result.  This expression will be evaluated for each row prior
+   to other conditionals or functions which are part of the query.  The
+   one exception to this rule are <TT
+CLASS="LITERAL"
+>leakproof</TT
+> functions,
+   which are guaranteed to not leak information.  Two expressions may be
+   specified to provide independent control over the rows which are
+   visible and the rows which are allowed to be added.  The expression
+   is run as part of the query and with the privileges of the user
+   running the query, however, security definer functions can be used in
+   the expression.
+  </P
+><P
+>   Enabling and disabling row security, as well as adding policies to a
+   table, is always the privilege of the owner only.
+  </P
+><P
+>   Policies are created using the <A
+HREF="sql-createpolicy.html"
+>CREATE POLICY</A
+>
+   command, altered using the <A
+HREF="sql-alterpolicy.html"
+>ALTER POLICY</A
+> command,
+   and dropped using the <A
+HREF="sql-droppolicy.html"
+>DROP POLICY</A
+> command.  To
+   enable and disable row security for a given table, use the
+   <A
+HREF="sql-altertable.html"
+>ALTER TABLE</A
+> command.
+  </P
+><P
+>   The table owners and superusers bypass the row security system when
+   querying a table, by default.  Row security can be enabled for
+   superusers and table owners by setting
+   <A
+HREF="runtime-config-client.html#GUC-ROW-SECURITY"
+>row_security</A
+> to <TT
+CLASS="LITERAL"
+>force</TT
+>.  Any
+   user can request that row security be bypassed by setting
+   <A
+HREF="runtime-config-client.html#GUC-ROW-SECURITY"
+>row_security</A
+> to <TT
+CLASS="LITERAL"
+>off</TT
+>.  If
+   the user does not have privileges to bypass row security when
+   querying a given table then an error will be returned instead.  Other
+   users can be granted the ability to bypass the row security system
+   with the <TT
+CLASS="LITERAL"
+>BYPASSRLS</TT
+> role attribute.  This
+   attribute can only be set by a superuser.
+  </P
+><P
+>   Each policy has a name and multiple policies can be defined for a
+   table.  As policies are table-specific, each policy for a table must
+   have a unique name.  Different tables may have policies with the
+   same name.
+  </P
+><P
+>   When multiple policies apply to a given query, they are combined using
+   <TT
+CLASS="LITERAL"
+>OR</TT
+>, similar to how a given role has the privileges
+   of all roles which they are a member of.
+  </P
+><P
+>   Referential integrity checks, such as unique or primary key constraints
+   and foreign key references, will bypass row security to ensure that
+   data integrity is maintained.  Care must be taken when developing
+   schemas and row level policies to avoid a "covert channel" leak of
+   information through these referential integrity checks.
+  </P
+><P
+>   To enable row security for a table,
+   the <TT
+CLASS="COMMAND"
+>ALTER TABLE</TT
+> is used.  For example, to enable
+   row level security for the table accounts, use:
+  </P
+><PRE
+CLASS="PROGRAMLISTING"
+>-- Create the table first
+CREATE TABLE accounts (manager text, company text, contact_email text);
+ALTER TABLE accounts ENABLE ROW LEVEL SECURITY;</PRE
+><P
+>   To create a policy on the account relation to allow the managers role
+   to view the rows of their accounts, the <TT
+CLASS="COMMAND"
+>CREATE POLICY</TT
+>
+   command can be used:
+  </P
+><PRE
+CLASS="PROGRAMLISTING"
+>CREATE POLICY account_managers ON accounts TO managers
+    USING (manager = current_user);</PRE
+><P
+>   If no role is specified, or the special <SPAN
+CLASS="QUOTE"
+>"user"</SPAN
+> name
+   <TT
+CLASS="LITERAL"
+>PUBLIC</TT
+> is used, then the policy applies to all
+   users on the system.  To allow all users to view their own row in
+   a user table, a simple policy can be used:
+  </P
+><PRE
+CLASS="PROGRAMLISTING"
+>CREATE POLICY user_policy ON users
+    USING (user = current_user);</PRE
+><P
+>   To use a different policy for rows which are being added to the
+   table from those rows which are visible, the WITH CHECK clause
+   can be used.  This would allow all users to view all rows in the
+   users table, but only modify their own:
+  </P
+><PRE
+CLASS="PROGRAMLISTING"
+>CREATE POLICY user_policy ON users
+    USING (true)
+    WITH CHECK (user = current_user);</PRE
+><P
+>   Row security can be disabled with the <TT
+CLASS="COMMAND"
+>ALTER TABLE</TT
+>
+   also.  Note that disabling row security does not remove the
+   policies which are defined on the table, they are simply ignored
+   and all rows are visible and able to be added, subject to the
+   normal privileges system.
+  </P
+><P
+>   Below is a larger example of how this feature can be used in
+   production environments, based on a unix password file.
+  </P
+><PRE
+CLASS="PROGRAMLISTING"
+>-- Simple passwd-file based example
+CREATE TABLE passwd (
+  username              text UNIQUE NOT NULL,
+  pwhash                text,
+  uid                   int  PRIMARY KEY,
+  gid                   int  NOT NULL,
+  real_name             text NOT NULL,
+  home_phone            text,
+  extra_info            text,
+  home_dir              text NOT NULL,
+  shell                 text NOT NULL
+);
+
+CREATE ROLE admin;  -- Administrator
+CREATE ROLE bob;    -- Normal user
+CREATE ROLE alice;  -- Normal user
+
+-- Populate the table
+INSERT INTO passwd VALUES
+  ('admin','xxx',0,0,'Admin','111-222-3333',null,'/root','/bin/dash');
+INSERT INTO passwd VALUES
+  ('bob','xxx',1,1,'Bob','123-456-7890',null,'/home/bob','/bin/zsh');
+INSERT INTO passwd VALUES
+  ('alice','xxx',2,1,'Alice','098-765-4321',null,'/home/alice','/bin/zsh');
+
+-- Be sure to enable row level security on the table
+ALTER TABLE passwd ENABLE ROW LEVEL SECURITY;
+
+-- Create policies
+-- Administrator can see all rows and add any rows
+CREATE POLICY admin_all ON passwd TO admin USING (true) WITH CHECK (true);
+-- Normal users can view all rows
+CREATE POLICY all_view ON passwd FOR SELECT USING (true);
+-- Normal users can update their own records, but
+-- limit which shells a normal user is allowed to set
+CREATE POLICY user_mod ON passwd FOR UPDATE
+  USING (current_user = username)
+  WITH CHECK (
+    current_user = username AND
+    shell IN ('/bin/bash','/bin/sh','/bin/dash','/bin/zsh','/bin/tcsh')
+  );
+
+-- Allow admin all normal rights
+GRANT SELECT, INSERT, UPDATE, DELETE ON passwd TO admin;
+-- Users only get select access on public columns
+GRANT SELECT
+  (username, uid, gid, real_name, home_phone, extra_info, home_dir, shell)
+  ON passwd TO public;
+-- Allow users to update certain columns
+GRANT UPDATE
+  (pwhash, real_name, home_phone, extra_info, shell)
+  ON passwd TO public;</PRE
+><P
+>   As with any security settings, it's important to test and ensure that
+   the system is behaving as expected.  Using the example above, this
+   demonstrates that the permission system is working properly.
+  </P
+><PRE
+CLASS="PROGRAMLISTING"
+>-- admin can view all rows and fields
+postgres=&#62; set role admin;
+SET
+postgres=&#62; table passwd;
+ username | pwhash | uid | gid | real_name |  home_phone  | extra_info | home_dir    |   shell   
+----------+--------+-----+-----+-----------+--------------+------------+-------------+-----------
+ admin    | xxx    |   0 |   0 | Admin     | 111-222-3333 |            | /root       | /bin/dash
+ bob      | xxx    |   1 |   1 | Bob       | 123-456-7890 |            | /home/bob   | /bin/zsh
+ alice    | xxx    |   2 |   1 | Alice     | 098-765-4321 |            | /home/alice | /bin/zsh
+(3 rows)
+
+-- Test what Alice is able to do
+postgres=&#62; set role alice;
+SET
+postgres=&#62; table passwd;
+ERROR:  permission denied for relation passwd
+postgres=&#62; select username,real_name,home_phone,extra_info,home_dir,shell from passwd;
+ username | real_name |  home_phone  | extra_info | home_dir    |   shell   
+----------+-----------+--------------+------------+-------------+-----------
+ admin    | Admin     | 111-222-3333 |            | /root       | /bin/dash
+ bob      | Bob       | 123-456-7890 |            | /home/bob   | /bin/zsh
+ alice    | Alice     | 098-765-4321 |            | /home/alice | /bin/zsh
+(3 rows)
+
+postgres=&#62; update passwd set username = 'joe';
+ERROR:  permission denied for relation passwd
+-- Allowed to change her own real_name, but no others
+postgres=&#62; update passwd set real_name = 'Alice Doe';
+UPDATE 1
+postgres=&#62; update passwd set real_name = 'John Doe' where username = 'admin';
+UPDATE 0
+postgres=&#62; update passwd set shell = '/bin/xx';
+ERROR:  new row violates WITH CHECK OPTION for "passwd"
+postgres=&#62; delete from passwd;
+ERROR:  permission denied for relation passwd
+postgres=&#62; insert into passwd (username) values ('xxx');
+ERROR:  permission denied for relation passwd
+-- Alice can change her own password
+postgres=&#62; update passwd set pwhash = 'abc';
+UPDATE 1</PRE
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="ddl-priv.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="ddl-schemas.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+>Privileges</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="ddl.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+>Schemas</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>

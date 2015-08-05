@@ -1,0 +1,311 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>Tablesample Method Functions</TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REV="MADE"
+HREF="mailto:pgsql-docs@postgresql.org"><LINK
+REL="HOME"
+TITLE="Postgres-XL 9.5alpha1 (Postgres-XL 9.5alpha1) Documentation"
+HREF="index.html"><LINK
+REL="UP"
+TITLE="Writing A TABLESAMPLE Sampling Method"
+HREF="tablesample-method.html"><LINK
+REL="PREVIOUS"
+TITLE="Writing A TABLESAMPLE Sampling Method"
+HREF="tablesample-method.html"><LINK
+REL="NEXT"
+TITLE="Database Physical Storage"
+HREF="storage.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"><META
+HTTP-EQUIV="Content-Type"
+CONTENT="text/html; charset=ISO-8859-1"><META
+NAME="creation"
+CONTENT="2015-07-31T21:28:58"></HEAD
+><BODY
+CLASS="SECT1"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="4"
+ALIGN="center"
+VALIGN="bottom"
+><A
+HREF="index.html"
+>Postgres-XL 9.5alpha1 (Postgres-XL 9.5alpha1) Documentation</A
+></TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="top"
+><A
+TITLE="Writing A TABLESAMPLE Sampling Method"
+HREF="tablesample-method.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="tablesample-method.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="60%"
+ALIGN="center"
+VALIGN="bottom"
+>Chapter 63. Writing A TABLESAMPLE Sampling Method</TD
+><TD
+WIDTH="20%"
+ALIGN="right"
+VALIGN="top"
+><A
+TITLE="Database Physical Storage"
+HREF="storage.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="SECT1"
+><H1
+CLASS="SECT1"
+><A
+NAME="TABLESAMPLE-METHOD-FUNCTIONS"
+>63.1. Tablesample Method Functions</A
+></H1
+><P
+>   The tablesample method must provide following set of functions:
+  </P
+><P
+></P><PRE
+CLASS="PROGRAMLISTING"
+>void
+tsm_init (TableSampleDesc *desc,
+         uint32 seed, ...);</PRE
+><P>
+   Initialize the tablesample scan. The function is called at the beginning
+   of each relation scan.
+  </P
+><P
+>   Note that the first two parameters are required but you can specify
+   additional parameters which then will be used by the <TT
+CLASS="COMMAND"
+>TABLESAMPLE</TT
+>
+   clause to determine the required user input in the query itself.
+   This means that if your function will specify additional float4 parameter
+   named percent, the user will have to call the tablesample method with
+   expression which evaluates (or can be coerced) to float4.
+   For example this definition:
+</P><PRE
+CLASS="PROGRAMLISTING"
+>tsm_init (TableSampleDesc *desc,
+          uint32 seed, float4 pct);</PRE
+><P>
+Will lead to SQL call like this:
+</P><PRE
+CLASS="PROGRAMLISTING"
+>... TABLESAMPLE yourmethod(0.5) ...</PRE
+><P>
+  </P
+><P
+></P><PRE
+CLASS="PROGRAMLISTING"
+>BlockNumber
+tsm_nextblock (TableSampleDesc *desc);</PRE
+><P>
+   Returns the block number of next page to be scanned. InvalidBlockNumber
+   should be returned if the sampling has reached end of the relation.
+  </P
+><P
+></P><PRE
+CLASS="PROGRAMLISTING"
+>OffsetNumber
+tsm_nexttuple (TableSampleDesc *desc, BlockNumber blockno,
+               OffsetNumber maxoffset);</PRE
+><P>
+   Return next tuple offset for the current page. InvalidOffsetNumber should
+   be returned if the sampling has reached end of the page.
+  </P
+><P
+></P><PRE
+CLASS="PROGRAMLISTING"
+>void
+tsm_end (TableSampleDesc *desc);</PRE
+><P>
+   The scan has finished, cleanup any left over state.
+  </P
+><P
+></P><PRE
+CLASS="PROGRAMLISTING"
+>void
+tsm_reset (TableSampleDesc *desc);</PRE
+><P>
+   The scan needs to rescan the relation again, reset any tablesample method
+   state.
+  </P
+><P
+></P><PRE
+CLASS="PROGRAMLISTING"
+>void
+tsm_cost (PlannerInfo *root, Path *path, RelOptInfo *baserel,
+          List *args, BlockNumber *pages, double *tuples);</PRE
+><P>
+   This function is used by optimizer to decide best plan and is also used
+   for output of <TT
+CLASS="COMMAND"
+>EXPLAIN</TT
+>.
+  </P
+><P
+>   There is one more function which tablesampling method can implement in order
+   to gain more fine grained control over sampling. This function is optional:
+  </P
+><P
+></P><PRE
+CLASS="PROGRAMLISTING"
+>bool
+tsm_examinetuple (TableSampleDesc *desc, BlockNumber blockno,
+                  HeapTuple tuple, bool visible);</PRE
+><P>
+   Function that enables the sampling method to examine contents of the tuple
+   (for example to collect some internal statistics). The return value of this
+   function is used to determine if the tuple should be returned to client.
+   Note that this function will receive even invisible tuples but it is not
+   allowed to return true for such tuple (if it does,
+   <SPAN
+CLASS="PRODUCTNAME"
+>PostgreSQL</SPAN
+> will raise an error).
+  </P
+><P
+>  As you can see most of the tablesample method interfaces get the
+  <TT
+CLASS="STRUCTNAME"
+>TableSampleDesc</TT
+> as a first parameter. This structure holds
+  state of the current scan and also provides storage for the tablesample
+  method's state. It is defined as following:
+</P><PRE
+CLASS="PROGRAMLISTING"
+>typedef struct TableSampleDesc {
+    HeapScanDesc    heapScan;
+    TupleDesc       tupDesc;
+
+    void           *tsmdata;
+} TableSampleDesc;</PRE
+><P>
+  Where <TT
+CLASS="STRUCTFIELD"
+>heapScan</TT
+> is the descriptor of the physical table scan.
+  It's possible to get table size info from it. The <TT
+CLASS="STRUCTFIELD"
+>tupDesc</TT
+>
+  represents the tuple descriptor of the tuples returned by the scan and passed
+  to the <CODE
+CLASS="FUNCTION"
+>tsm_examinetuple()</CODE
+> interface. The <TT
+CLASS="STRUCTFIELD"
+>tsmdata</TT
+>
+  can be used by tablesample method itself to store any state info it might
+  need during the scan. If used by the method, it should be <CODE
+CLASS="FUNCTION"
+>pfree</CODE
+>d
+  in <CODE
+CLASS="FUNCTION"
+>tsm_end()</CODE
+> function.
+  </P
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="tablesample-method.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="storage.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+>Writing A TABLESAMPLE Sampling Method</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="tablesample-method.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+>Database Physical Storage</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>

@@ -1,0 +1,638 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+> What is Postgres-XL?</TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REV="MADE"
+HREF="mailto:pgsql-docs@postgresql.org"><LINK
+REL="HOME"
+TITLE="Postgres-XL 9.5alpha1 (Postgres-XL 9.5alpha1) Documentation"
+HREF="index.html"><LINK
+REL="UP"
+TITLE="Preface"
+HREF="preface.html"><LINK
+REL="PREVIOUS"
+TITLE=" What is PostgreSQL?"
+HREF="intro-whatis.html"><LINK
+REL="NEXT"
+TITLE="A Brief History of PostgreSQL"
+HREF="history.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"><META
+HTTP-EQUIV="Content-Type"
+CONTENT="text/html; charset=ISO-8859-1"><META
+NAME="creation"
+CONTENT="2015-07-31T21:28:58"></HEAD
+><BODY
+CLASS="SECT1"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="4"
+ALIGN="center"
+VALIGN="bottom"
+><A
+HREF="index.html"
+>Postgres-XL 9.5alpha1 (Postgres-XL 9.5alpha1) Documentation</A
+></TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="top"
+><A
+TITLE=" What is PostgreSQL?"
+HREF="intro-whatis.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="preface.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="60%"
+ALIGN="center"
+VALIGN="bottom"
+>Preface</TD
+><TD
+WIDTH="20%"
+ALIGN="right"
+VALIGN="top"
+><A
+TITLE="A Brief History of PostgreSQL"
+HREF="history.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="SECT1"
+><H1
+CLASS="SECT1"
+><A
+NAME="INTRO-WHATIS-POSTGRES-XL"
+>What is <SPAN
+CLASS="PRODUCTNAME"
+>Postgres-XL</SPAN
+>?</A
+></H1
+><DIV
+CLASS="SECT2"
+><H2
+CLASS="SECT2"
+><A
+NAME="WHATIS-POSTGRES-XL-IN-SHORT"
+>In short</A
+></H2
+><P
+>     Postgres-XL is an open source project to provide both write-scalability
+     and massively parallel processing transparently to PostgreSQL.  It is a
+     collection of tightly coupled database components which can be installed
+     on more than one system or virtual machine.
+    </P
+><P
+>     Write-scalable means Postgres-XL can be configured with as many database
+     servers as you want and handle many more writes (updating SQL statements)
+     than a single standalone database server could otherwise do. You can have
+     more than one database server that provides a single database view.  Any
+     database update from any database server is immediately visible to any
+     other transactions running on different servers.  Transparent means you do
+     not necessarily need to worry about how your data is stored in more than
+     one database servers internally.
+     <A
+NAME="AEN124"
+HREF="#FTN.AEN124"
+><SPAN
+CLASS="footnote"
+>[1]</SPAN
+></A
+>
+    </P
+><P
+>    You can configure Postgres-XL to run on more than one machine. It stores
+    your data in a distributed way, that is, partitioned or replicated
+    depending on what is chosen for each table.
+    <A
+NAME="AEN127"
+HREF="#FTN.AEN127"
+><SPAN
+CLASS="footnote"
+>[2]</SPAN
+></A
+>
+    When you issue queries, Postgres-XL determines where the target data is
+    stored and dispatches corresponding plans to the servers containing the
+    target data.
+   </P
+><P
+>    In typical web systems, you can have as many web servers or application
+    servers to handle your transactions. However, you cannot do this for a
+    database server in general because all the changing data have to be visible
+    to all the transactions. Unlike other database cluster solutions,
+    Postgres-XL provides this capability. You can install as many database
+    servers as you like. Each database server provides uniform data view to
+    your applications.  Any database update from any server is immediately
+    visible to applications connecting the database from other servers. This is
+    one of the most important features of Postgres-XL.
+   </P
+><P
+>    The other significant feature of Postgres-XL is MPP parallelism.  You can
+    use Postgres-XL to handle workloads for Business Intelligence, Data
+    Warehousing, or Big Data. In Postgres-XL, a plan is generated once on a
+    coordinator, and sent down to the individual data nodes. This is then
+    executed, with the data nodes communicating directly with one another,
+    where each understands from where it is expected to receive any tuples that
+    it needs to ship, and where it needs to send to others.
+   </P
+></DIV
+><DIV
+CLASS="SECT2"
+><H2
+CLASS="SECT2"
+><A
+NAME="WHATIS-XC-GOAL"
+>Postgres-XL's Goal</A
+></H2
+><P
+>    The ultimate goal of Postgres-XL is to provide database scalability with
+    ACID consistency across all types of database workloads.  That is,
+    Postgres-XL should provide the following features:
+    <P
+></P
+></P><UL
+COMPACT="COMPACT"
+><LI
+><P
+>       Postgres-XL should provide multiple servers to accept transactions and
+       statements from applications, which are known as "Coordinator"
+       processes.
+      </P
+></LI
+><LI
+><P
+>       Any Coordinator should provide a consistent database view to
+       applications. Any updates from any Coordinator must be visible in real
+       time as if such updates are done in single PostgreSQL server.
+      </P
+></LI
+><LI
+><P
+>       Postgres-XL should allow Datanodes to communicate directly with one
+       another execute queries in an efficient and parallel manner.
+      </P
+></LI
+><LI
+><P
+>       Tables should be able to be stored in the database designated as
+       replicated or distributed (known as fragments or partitions).
+       Replication and distribution should be transparent to applications; that
+       is, such replicated and distributed tables are seen as single tables and
+       the location or number of copies of each record/tuple is managed by
+       Postgres-XL and is not visible to applications.
+      </P
+></LI
+><LI
+><P
+>       Postgres-XL provides compatible PostgreSQL API to applications.
+      </P
+></LI
+><LI
+><P
+>       Postgres-XL should provide single and unified view of
+       underlying PostgreSQL database servers so that SQL statements
+       do not depend on how the tables are actually stored.
+      </P
+></LI
+></UL
+><P>
+   </P
+></DIV
+><DIV
+CLASS="SECT2"
+><H2
+CLASS="SECT2"
+><A
+NAME="WHATIS-XC-KEY-COMPONENTS"
+>Postgres-XL Key Components</A
+></H2
+><P
+>    In this section, we will describe the main components of Postgres-XL.
+   </P
+><P
+>    Postgres-XL is composed of three major components: the GTM (Global
+    Transaction Manager), the Coordinator and the Datanode. Their features are
+    given in the following sections.
+   </P
+><DIV
+CLASS="SECT3"
+><H3
+CLASS="SECT3"
+><A
+NAME="AEN151"
+>GTM (Global Transaction Manager)</A
+></H3
+><P
+>     The GTM is a key component of Postgres-XL to provide consistent
+     transaction management and tuple visibility control.
+    </P
+><P
+>     As described later in this manual, <SPAN
+CLASS="PRODUCTNAME"
+>PostgreSQL</SPAN
+>'s
+     transaction management is based upon MVCC (Multi-Version Concurrency
+     Control) technology.  <SPAN
+CLASS="PRODUCTNAME"
+>Postgres-XL</SPAN
+> extracts this
+     technology into separate component such as the GTM so that any
+     <SPAN
+CLASS="PRODUCTNAME"
+>Postgres-XL</SPAN
+> component's transaction management
+     is based upon single global status.  Details will be described in <A
+HREF="overview.html"
+>Chapter 48</A
+>.
+    </P
+></DIV
+><DIV
+CLASS="SECT3"
+><H3
+CLASS="SECT3"
+><A
+NAME="AEN159"
+>Coordinator</A
+></H3
+><P
+>     The Coordinator is an interface to the database for applications. It acts
+     like a conventional PostgreSQL backend process, however the Coordinator
+     does not store any actual data. The actual data is stored by the Datanodes
+     as described below. The Coordinator receives SQL statements, gets Global
+     Transaction Id and Global Snapshots as needed, determines which Datanodes
+     are involved and asks them to execute (a part of) statement.  When issuing
+     statement to Datanodes, it is associated with GXID and Global Snapshot so
+     that Multi-version Concurrency Control (MVCC) properties extend
+     cluster-wide.
+    </P
+></DIV
+><DIV
+CLASS="SECT3"
+><H3
+CLASS="SECT3"
+><A
+NAME="AEN162"
+>Datanode</A
+></H3
+><P
+>     The Datanode actually stores user data. Tables may be distributed among
+     Datanodes, or replicated to all the Datanodes.  The Datanode does not have
+     a global view of the whole database, it just takes care of locally stored
+     data. Incoming statements are examined by the Coordinator as described
+     next, and subplans are made. These are  then transferred to each Datanode
+     involved together with a GXID and Global Snapshot as needed. The datanode
+     may receive request from various Coordinators in separate sessions.
+     However, because each transaction is identified uniquely and associated
+     with a consistent (global) snapshot, each Datanode can properly execute in
+     its transaction and snapshot context.
+    </P
+></DIV
+></DIV
+><DIV
+CLASS="SECT2"
+><H2
+CLASS="SECT2"
+><A
+NAME="WHATIS-XC-INHERITS-POSTGRESQL"
+><SPAN
+CLASS="PRODUCTNAME"
+>Postgres-XL</SPAN
+> Inherits From <SPAN
+CLASS="PRODUCTNAME"
+>PostgreSQL</SPAN
+></A
+></H2
+><P
+>    <SPAN
+CLASS="PRODUCTNAME"
+>Postgres-XL</SPAN
+> is an extension to
+    <SPAN
+CLASS="PRODUCTNAME"
+>PostgreSQL</SPAN
+> and inherits most of its features.
+   </P
+><P
+>    It is an open-source descendant of <SPAN
+CLASS="PRODUCTNAME"
+>PostgreSQL</SPAN
+>
+    and its original Berkeley code.  It supports a large part of the SQL
+    standard and offers many modern features:
+
+    <P
+></P
+></P><UL
+COMPACT="COMPACT"
+><LI
+><SPAN
+>complex queries</SPAN
+></LI
+><LI
+><SPAN
+>       foreign keys
+       <A
+NAME="AEN179"
+HREF="#FTN.AEN179"
+><SPAN
+CLASS="footnote"
+>[3]</SPAN
+></A
+>
+      </SPAN
+></LI
+><LI
+><SPAN
+>       triggers
+       <A
+NAME="AEN185"
+HREF="#FTN.AEN185"
+><SPAN
+CLASS="footnote"
+>[4]</SPAN
+></A
+>
+      </SPAN
+></LI
+><LI
+><SPAN
+>views</SPAN
+></LI
+><LI
+><SPAN
+>transactional integrity, at the exception of SSI whose support
+      is incomplete</SPAN
+></LI
+><LI
+><SPAN
+>multiversion concurrency control</SPAN
+></LI
+></UL
+><P>
+
+    Also, similar to <SPAN
+CLASS="PRODUCTNAME"
+>PostgreSQL</SPAN
+>,
+    <SPAN
+CLASS="PRODUCTNAME"
+>Postgres-XL</SPAN
+> can be extended by the user in many
+    ways, for example by adding new
+
+    <P
+></P
+></P><UL
+COMPACT="COMPACT"
+><LI
+><SPAN
+>data types</SPAN
+></LI
+><LI
+><SPAN
+>functions</SPAN
+></LI
+><LI
+><SPAN
+>operators</SPAN
+></LI
+><LI
+><SPAN
+>aggregate functions</SPAN
+></LI
+><LI
+><SPAN
+>index methods</SPAN
+></LI
+><LI
+><SPAN
+>procedural languages</SPAN
+></LI
+></UL
+><P>
+   </P
+><P
+>    <SPAN
+CLASS="PRODUCTNAME"
+>Postgres-XL</SPAN
+> can be used, modified, and
+    distributed by anyone free of charge for any purpose, be it private,
+    commercial, or academic, provided it adheres to the Mozilla Public License
+    version 2.
+   </P
+></DIV
+></DIV
+><H3
+CLASS="FOOTNOTES"
+>Notes</H3
+><TABLE
+BORDER="0"
+CLASS="FOOTNOTES"
+WIDTH="100%"
+><TR
+><TD
+ALIGN="LEFT"
+VALIGN="TOP"
+WIDTH="5%"
+><A
+NAME="FTN.AEN124"
+HREF="intro-whatis-postgres-xl.html#AEN124"
+><SPAN
+CLASS="footnote"
+>[1]</SPAN
+></A
+></TD
+><TD
+ALIGN="LEFT"
+VALIGN="TOP"
+WIDTH="95%"
+><P
+>       Of course, you should use the information about how tables are stored
+       internally when you design the database physically to get most from
+       Postgres-XL.
+      </P
+></TD
+></TR
+><TR
+><TD
+ALIGN="LEFT"
+VALIGN="TOP"
+WIDTH="5%"
+><A
+NAME="FTN.AEN127"
+HREF="intro-whatis-postgres-xl.html#AEN127"
+><SPAN
+CLASS="footnote"
+>[2]</SPAN
+></A
+></TD
+><TD
+ALIGN="LEFT"
+VALIGN="TOP"
+WIDTH="95%"
+><P
+>      To distinguish from PostgreSQL's native partitioning, we refer to this as
+      "distribution".  In distributed database textbooks, this is often
+      referred to as a "horizontal fragment", and more recently, sharding.
+     </P
+></TD
+></TR
+><TR
+><TD
+ALIGN="LEFT"
+VALIGN="TOP"
+WIDTH="5%"
+><A
+NAME="FTN.AEN179"
+HREF="intro-whatis-postgres-xl.html#AEN179"
+><SPAN
+CLASS="footnote"
+>[3]</SPAN
+></A
+></TD
+><TD
+ALIGN="LEFT"
+VALIGN="TOP"
+WIDTH="95%"
+><P
+>         <SPAN
+CLASS="PRODUCTNAME"
+>Postgres-XL</SPAN
+>'s foreign key usage has some
+         restrictions.  For details, see <A
+HREF="sql-createtable.html"
+>CREATE TABLE</A
+>.
+        </P
+></TD
+></TR
+><TR
+><TD
+ALIGN="LEFT"
+VALIGN="TOP"
+WIDTH="5%"
+><A
+NAME="FTN.AEN185"
+HREF="intro-whatis-postgres-xl.html#AEN185"
+><SPAN
+CLASS="footnote"
+>[4]</SPAN
+></A
+></TD
+><TD
+ALIGN="LEFT"
+VALIGN="TOP"
+WIDTH="95%"
+><P
+>         <SPAN
+CLASS="PRODUCTNAME"
+>Postgres-XL</SPAN
+> does not support triggers in
+         the current version.  This may be supported in future releases.
+        </P
+></TD
+></TR
+></TABLE
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="intro-whatis.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="history.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+>What is <SPAN
+CLASS="PRODUCTNAME"
+>PostgreSQL</SPAN
+>?</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="preface.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+>A Brief History of <SPAN
+CLASS="PRODUCTNAME"
+>PostgreSQL</SPAN
+></TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>

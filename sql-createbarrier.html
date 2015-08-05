@@ -1,0 +1,228 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>CREATE BARRIER</TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REV="MADE"
+HREF="mailto:pgsql-docs@postgresql.org"><LINK
+REL="HOME"
+TITLE="Postgres-XL 9.5alpha1 (Postgres-XL 9.5alpha1) Documentation"
+HREF="index.html"><LINK
+REL="UP"
+TITLE="SQL Commands"
+HREF="sql-commands.html"><LINK
+REL="PREVIOUS"
+TITLE="CREATE AGGREGATE"
+HREF="sql-createaggregate.html"><LINK
+REL="NEXT"
+TITLE="CREATE CAST"
+HREF="sql-createcast.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"><META
+HTTP-EQUIV="Content-Type"
+CONTENT="text/html; charset=ISO-8859-1"><META
+NAME="creation"
+CONTENT="2015-07-31T21:28:58"></HEAD
+><BODY
+CLASS="REFENTRY"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="4"
+ALIGN="center"
+VALIGN="bottom"
+><A
+HREF="index.html"
+>Postgres-XL 9.5alpha1 (Postgres-XL 9.5alpha1) Documentation</A
+></TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="top"
+><A
+TITLE="CREATE AGGREGATE"
+HREF="sql-createaggregate.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="sql-commands.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="60%"
+ALIGN="center"
+VALIGN="bottom"
+></TD
+><TD
+WIDTH="20%"
+ALIGN="right"
+VALIGN="top"
+><A
+TITLE="CREATE CAST"
+HREF="sql-createcast.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><H1
+><A
+NAME="SQL-CREATEBARRIER"
+></A
+>CREATE BARRIER</H1
+><DIV
+CLASS="REFNAMEDIV"
+><A
+NAME="AEN76100"
+></A
+><H2
+>Name</H2
+>CREATE BARRIER&nbsp;--&nbsp;create a new barrier</DIV
+><DIV
+CLASS="REFSYNOPSISDIV"
+><A
+NAME="AEN76103"
+></A
+><H2
+>Synopsis</H2
+><PRE
+CLASS="SYNOPSIS"
+>CREATE BARRIER <TT
+CLASS="REPLACEABLE"
+><I
+>barrier_name</I
+></TT
+></PRE
+></DIV
+><DIV
+CLASS="REFSECT1"
+><A
+NAME="AEN76106"
+></A
+><H2
+>Description</H2
+><P
+>   <TT
+CLASS="COMMAND"
+>CREATE BARRIER</TT
+> is new SQL command specific
+   to <SPAN
+CLASS="PRODUCTNAME"
+>Postgres-XL</SPAN
+> that creates
+   a new XLOG record on each node of the cluster consistently. 
+   Essentially a barrier is a consistent point in the cluster that
+   you can recover to. Note that these are currently created manually,
+   not autoatically. Without barriers, if you recover an individual 
+   component, it may be possible that it is not consistent with the
+   other nodes depending on when it was committed.
+  </P
+><P
+>A barrier
+   is created via a 2PC-like mechanism from a remote Coordinator in 3
+   phases with a prepare, execute and ending phases.  A new recovery
+   parameter called recovery_target_barrier has been added in
+   recovery.conf. In order to perform a complete PITR recovery, it is
+   necessary to set recovery_target_barrier to the value of a barrier
+   already created. Then distribute recovery.conf to each data folder
+   of each node, and then to restart the nodes one by one.
+  </P
+><P
+>   The default barrier name is <TT
+CLASS="LITERAL"
+>dummy_barrier_id</TT
+>. It is
+   used when no barrier name is specified when using <TT
+CLASS="COMMAND"
+>CREATE
+   BARRIER</TT
+>.
+  </P
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="sql-createaggregate.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="sql-createcast.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+>CREATE AGGREGATE</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="sql-commands.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+>CREATE CAST</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>
