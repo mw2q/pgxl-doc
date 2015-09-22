@@ -26,7 +26,7 @@ HREF="stylesheet.css"><META
 HTTP-EQUIV="Content-Type"
 CONTENT="text/html; charset=ISO-8859-1"><META
 NAME="creation"
-CONTENT="2015-07-31T21:28:58"></HEAD
+CONTENT="2015-09-22T19:50:57"></HEAD
 ><BODY
 CLASS="REFENTRY"
 ><DIV
@@ -95,7 +95,7 @@ NAME="SQL-CREATETABLEAS"
 ><DIV
 CLASS="REFNAMEDIV"
 ><A
-NAME="AEN80665"
+NAME="AEN80669"
 ></A
 ><H2
 >Name</H2
@@ -103,7 +103,7 @@ NAME="AEN80665"
 ><DIV
 CLASS="REFSYNOPSISDIV"
 ><A
-NAME="AEN80668"
+NAME="AEN80672"
 ></A
 ><H2
 >Synopsis</H2
@@ -167,7 +167,7 @@ CLASS="REPLACEABLE"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN80679"
+NAME="AEN80683"
 ></A
 ><H2
 >Description</H2
@@ -207,7 +207,7 @@ CLASS="COMMAND"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN80688"
+NAME="AEN80692"
 ></A
 ><H2
 >Parameters</H2
@@ -532,9 +532,9 @@ CLASS="REPLACEABLE"
 >         Each row of the table will be placed based on the hash value
          of the specified column.  Following type is allowed as
          distribution column: INT8, INT2, OID, INT4, BOOL, INT2VECTOR,
-         OIDVECTOR, CHAR, NAME, TEXT, BPCHAR, BYTEA, VARCHAR, FLOAT4,
-         FLOAT8, NUMERIC, CASH, ABSTIME, RELTIME, DATE, TIME,
-         TIMESTAMP, TIMESTAMPTZ, INTERVAL, and TIMETZ.
+         OIDVECTOR, CHAR, NAME, TEXT, BPCHAR, BYTEA, VARCHAR, NUMERIC, 
+         MONEY, ABSTIME, RELTIME, DATE, TIME,TIMESTAMP, TIMESTAMPTZ, 
+         INTERVAL, and TIMETZ.
         </P
 ><P
 >         Please note that floating point is not allowed as a basis of
@@ -555,10 +555,8 @@ CLASS="REPLACEABLE"
 ><P
 >         Each row of the table will be placed based on the modulo
          of the specified column.  Following type is allowed as
-         distribution column: INT8, INT2, OID, INT4, BOOL, INT2VECTOR,
-         OIDVECTOR, CHAR, NAME, TEXT, BPCHAR, BYTEA, VARCHAR, FLOAT4,
-         FLOAT8, NUMERIC, CASH, ABSTIME, RELTIME, DATE, TIME,
-         TIMESTAMP, TIMESTAMPTZ, INTERVAL, and TIMETZ.
+         distribution column: INT8, INT2, INT4, BOOL, ABSTIME, RELTIME, 
+         DATE.
         </P
 ><P
 >         Please note that floating point is not allowed as a basis of
@@ -685,7 +683,7 @@ CLASS="LITERAL"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN80856"
+NAME="AEN80860"
 ></A
 ><H2
 >Notes</H2
@@ -725,7 +723,7 @@ HREF="runtime-config-compatible.html#GUC-DEFAULT-WITH-OIDS"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN80866"
+NAME="AEN80870"
 ></A
 ><H2
 >Examples</H2
@@ -780,7 +778,7 @@ CREATE TEMP TABLE films_recent WITH (OIDS) ON COMMIT DROP AS
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN80879"
+NAME="AEN80883"
 ></A
 ><H2
 >Compatibility</H2
@@ -862,7 +860,7 @@ CLASS="LITERAL"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN80903"
+NAME="AEN80907"
 ></A
 ><H2
 >See Also</H2

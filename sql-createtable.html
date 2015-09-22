@@ -26,7 +26,7 @@ HREF="stylesheet.css"><META
 HTTP-EQUIV="Content-Type"
 CONTENT="text/html; charset=ISO-8859-1"><META
 NAME="creation"
-CONTENT="2015-07-31T21:28:58"></HEAD
+CONTENT="2015-09-22T19:50:57"></HEAD
 ><BODY
 CLASS="REFENTRY"
 ><DIV
@@ -95,7 +95,7 @@ NAME="SQL-CREATETABLE"
 ><DIV
 CLASS="REFNAMEDIV"
 ><A
-NAME="AEN79800"
+NAME="AEN79804"
 ></A
 ><H2
 >Name</H2
@@ -103,7 +103,7 @@ NAME="AEN79800"
 ><DIV
 CLASS="REFSYNOPSISDIV"
 ><A
-NAME="AEN79803"
+NAME="AEN79807"
 ></A
 ><H2
 >Synopsis</H2
@@ -589,7 +589,7 @@ CLASS="LITERAL"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN79889"
+NAME="AEN79893"
 ></A
 ><H2
 >Parameters</H2
@@ -1397,7 +1397,8 @@ CLASS="REPLACEABLE"
 CLASS="PRODUCTNAME"
 >Postgres-XL</SPAN
 >, exclusion constraints are currently not
-      supported.
+      supported.The constraint is enforced when both rows map to the same datanode.
+      But if they go into different datanodes, the constraint is not enforced.
      </P
 ></DD
 ><DT
@@ -1975,9 +1976,9 @@ CLASS="REPLACEABLE"
 >         Each row of the table will be placed based on the hash value
          of the specified column.  Following type is allowed as
          distribution column: INT8, INT2, OID, INT4, BOOL, INT2VECTOR,
-         OIDVECTOR, CHAR, NAME, TEXT, BPCHAR, BYTEA, VARCHAR, FLOAT4,
-         FLOAT8, NUMERIC, CASH, ABSTIME, RELTIME, DATE, TIME,
-         TIMESTAMP, TIMESTAMPTZ, INTERVAL, and TIMETZ.
+         OIDVECTOR, CHAR, NAME, TEXT, BPCHAR, BYTEA, VARCHAR, NUMERIC, 
+         MONEY, ABSTIME, RELTIME, DATE, TIME,TIMESTAMP, TIMESTAMPTZ, 
+         INTERVAL, and TIMETZ.
         </P
 ><P
 >         Please note that floating point is not allowed as a basis of
@@ -1998,10 +1999,8 @@ CLASS="REPLACEABLE"
 ><P
 >         Each row of the table will be placed based on the modulo
          of the specified column.  Following type is allowed as
-         distribution column: INT8, INT2, OID, INT4, BOOL, INT2VECTOR,
-         OIDVECTOR, CHAR, NAME, TEXT, BPCHAR, BYTEA, VARCHAR, FLOAT4,
-         FLOAT8, NUMERIC, CASH, ABSTIME, RELTIME, DATE, TIME,
-         TIMESTAMP, TIMESTAMPTZ, INTERVAL, and TIMETZ.
+         distribution column: INT8, INT2, INT4, BOOL, ABSTIME, RELTIME, 
+         DATE.
         </P
 ><P
 >         Please note that floating point is not allowed as a basis of
@@ -2911,7 +2910,7 @@ CLASS="ACRONYM"
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN80553"
+NAME="AEN80557"
 ></A
 ><H3
 >Temporary Tables</H3
@@ -3010,7 +3009,7 @@ CLASS="LITERAL"
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN80576"
+NAME="AEN80580"
 ></A
 ><H3
 >Non-deferred Uniqueness Constraints</H3
@@ -3045,7 +3044,7 @@ CLASS="LITERAL"
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN80584"
+NAME="AEN80588"
 ></A
 ><H3
 >Column Check Constraints</H3
@@ -3069,7 +3068,7 @@ CLASS="PRODUCTNAME"
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN80590"
+NAME="AEN80594"
 ></A
 ><H3
 ><TT
@@ -3090,7 +3089,7 @@ CLASS="PRODUCTNAME"
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN80596"
+NAME="AEN80600"
 ></A
 ><H3
 ><TT
@@ -3124,7 +3123,7 @@ CLASS="LITERAL"
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN80605"
+NAME="AEN80609"
 ></A
 ><H3
 >Inheritance</H3
@@ -3149,7 +3148,7 @@ CLASS="PRODUCTNAME"
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN80611"
+NAME="AEN80615"
 ></A
 ><H3
 >Zero-column Tables</H3
@@ -3174,7 +3173,7 @@ CLASS="COMMAND"
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN80617"
+NAME="AEN80621"
 ></A
 ><H3
 ><TT
@@ -3195,7 +3194,7 @@ CLASS="PRODUCTNAME"
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN80623"
+NAME="AEN80627"
 ></A
 ><H3
 >Tablespaces</H3
@@ -3217,7 +3216,7 @@ CLASS="LITERAL"
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN80629"
+NAME="AEN80633"
 ></A
 ><H3
 >Typed Tables</H3
@@ -3236,7 +3235,7 @@ CLASS="QUOTE"
 ><DIV
 CLASS="REFSECT2"
 ><A
-NAME="AEN80633"
+NAME="AEN80637"
 ></A
 ><H3
 ><SPAN
@@ -3244,7 +3243,7 @@ CLASS="PRODUCTNAME"
 >Postgres-XL</SPAN
 > Specifics</H3
 ><P
->    Currently, non-immutable functions are not allowed
+>    Currently, immutable, stable, volatile functions and nextval are allowed in DEFAULT clause. 
     as <TT
 CLASS="LITERAL"
 >DEFAULT</TT
@@ -3279,7 +3278,7 @@ CLASS="PRODUCTNAME"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN80645"
+NAME="AEN80649"
 ></A
 ><H2
 >See Also</H2
